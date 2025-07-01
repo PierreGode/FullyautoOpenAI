@@ -25,6 +25,8 @@
 
 ---
 
+
+## use o4‑mini 
 ## 🧰 Config Options (example)
 
 ```js
