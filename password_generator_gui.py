@@ -23,6 +23,26 @@ class PasswordGeneratorApp:
         self.master = master
         master.title("Secure Password Generator")
 
+        # Define a colorful palette for the UI theme
+        bg_main = "#2E3440"
+        bg_frame = "#3B4252"
+        label_fg = "#D8DEE9"
+        check_colors = {
+            "Uppercase A-Z": "#BF616A",
+            "Lowercase a-z": "#A3BE8C",
+            "Digits 0-9": "#EBCB8B",
+            "Symbols !@#$…": "#81A1C1",
+        }
+        btn_bg = "#5E81AC"
+        btn_fg = "#ECEFF4"
+        copy_btn_bg = "#D08770"
+        entry_bg = "#ECEFF4"
+        entry_fg = "#2E3440"
+        error_fg = "#BF616A"
+
+        # Apply main window background color
+        master.configure(bg=bg_main)
+
         # Configure grid weights for resizing
         master.columnconfigure(0, weight=1)
         master.rowconfigure(0, weight=0)
@@ -32,9 +52,15 @@ class PasswordGeneratorApp:
         master.rowconfigure(4, weight=1)
 
         # Password length selection
-        length_frame = tk.Frame(master)
+        # Frame for password length selection
+        length_frame = tk.Frame(master, bg=bg_frame)
         length_frame.grid(padx=10, pady=5, sticky="ew")
-        tk.Label(length_frame, text="Password length:").pack(side="left")
+        tk.Label(
+            length_frame,
+            text="Password length:",
+            bg=bg_frame,
+            fg=label_fg
+        ).pack(side="left")
         self.length_var = tk.IntVar(value=12)
         self.spin_length = tk.Spinbox(
             length_frame,
@@ -42,45 +68,80 @@ class PasswordGeneratorApp:
             to=64,
             textvariable=self.length_var,
             width=5,
+            bg=bg_frame,
+            fg=label_fg,
+            insertbackground=label_fg,
+            highlightbackground=bg_frame,
         )
         self.spin_length.pack(side="left", padx=(5, 0))
 
         # Character set checkboxes
         self.check_vars = {}
-        check_frame = tk.Frame(master)
+        # Frame for character set options
+        check_frame = tk.Frame(master, bg=bg_frame)
         check_frame.grid(padx=10, pady=5, sticky="ew")
         for label in CHAR_SETS:
             var = tk.BooleanVar(value=True)
             chk = tk.Checkbutton(
-                check_frame, text=label, variable=var,
-                command=self.update_generate_button
+                check_frame,
+                text=label,
+                variable=var,
+                command=self.update_generate_button,
+                bg=check_colors[label],
+                fg=bg_frame,
+                selectcolor=label_fg,
+                activebackground=check_colors[label],
+                activeforeground=bg_frame,
             )
             chk.pack(side="left", padx=5)
             self.check_vars[label] = var
 
-        # Generate button
+        # Generate password button
         self.btn_generate = tk.Button(
-            master, text="Generate", command=self.generate_password
+            master,
+            text="Generate",
+            command=self.generate_password,
+            bg=btn_bg,
+            fg=btn_fg,
+            activebackground=check_colors["Uppercase A-Z"],
+            activeforeground=btn_fg,
         )
         self.btn_generate.grid(padx=10, pady=5, sticky="ew")
 
         # Error message label
-        self.error_label = tk.Label(master, text="", fg="red")
+        self.error_label = tk.Label(
+            master,
+            text="",
+            fg=error_fg,
+            bg=bg_main
+        )
         self.error_label.grid(padx=10, sticky="w")
 
-        # Password display entry
-        entry_frame = tk.Frame(master)
+        # Frame for displaying and copying the generated password
+        entry_frame = tk.Frame(master, bg=bg_frame)
         entry_frame.grid(padx=10, pady=5, sticky="ew")
         entry_frame.columnconfigure(0, weight=1)
         self.password_var = tk.StringVar()
         self.entry_password = tk.Entry(
-            entry_frame, textvariable=self.password_var, state="readonly"
+            entry_frame,
+            textvariable=self.password_var,
+            state="readonly",
+            bg=entry_bg,
+            fg=entry_fg,
+            readonlybackground=entry_bg,
+            disabledforeground=entry_fg,
         )
         self.entry_password.grid(row=0, column=0, sticky="ew")
 
-        # Copy to clipboard button
+        # Button to copy the password to clipboard
         self.btn_copy = tk.Button(
-            entry_frame, text="Copy to clipboard", command=self.copy_password
+            entry_frame,
+            text="Copy to clipboard",
+            command=self.copy_password,
+            bg=copy_btn_bg,
+            fg=btn_fg,
+            activebackground=check_colors["Digits 0-9"],
+            activeforeground=btn_fg,
         )
         self.btn_copy.grid(row=0, column=1, padx=(5, 0))
 
