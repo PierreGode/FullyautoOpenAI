@@ -1,11 +1,9 @@
 name: Codex Full Auto Updater
 
 on:
-  push:
   workflow_dispatch:
   schedule:
-    # Runs every hour; adjust as needed
-    - cron: '0 1 * * *'
+    #- cron: '0 1 * * *'
 
 jobs:
   codex-auto-update:
