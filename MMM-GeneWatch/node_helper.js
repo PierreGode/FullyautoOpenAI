@@ -33,8 +33,9 @@ module.exports = NodeHelper.create({
           allItems.push({
             title: item.title,
             link: item.link,
-            summary: "",
-            tags: []
+            summary: item.contentSnippet || item.content || "",
+            tags: [],
+            pubDate: item.pubDate
           });
         });
       } catch (e) {
@@ -52,7 +53,7 @@ module.exports = NodeHelper.create({
             model: "gpt-3.5-turbo",
             messages: [
               { role: "system", content: "You summarize biotechnology news." },
-              { role: "user", content: `Summarize this in two sentences:\n${item.title}` }
+              { role: "user", content: `Summarize this in two sentences:\n${item.summary || item.title}` }
             ]
           });
           item.summary = response.choices[0].message.content.trim();
@@ -61,6 +62,7 @@ module.exports = NodeHelper.create({
         }
       }
     }
+    allItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
     this.sendSocketNotification("GENEWATCH_DATA", allItems.slice(0, this.config.maxItems));
   }
 });
