@@ -34,6 +34,7 @@
   config: {
     updateInterval: 6 * 60 * 60 * 1000, // every 6 hours
     showTags: true,
+    showSourceLink: true, // display original source link
     maxItems: 3,
     sources: ["bioRxiv", "Nature", "Science"],
     useGPTSummary: true,

@@ -2,6 +2,7 @@ Module.register("MMM-GeneWatch", {
   defaults: {
     updateInterval: 6 * 60 * 60 * 1000,
     showTags: true,
+    showSourceLink: true,
     maxItems: 3,
     sources: ["bioRxiv", "Nature", "Science"],
     useGPTSummary: true,
@@ -43,12 +44,17 @@ Module.register("MMM-GeneWatch", {
       const itemContainer = document.createElement("div");
       itemContainer.className = "genewatch-item";
 
-      const title = document.createElement("a");
-      title.href = item.link;
-      title.target = "_blank";
-      title.textContent = item.title;
-      title.className = "genewatch-title";
-      itemContainer.appendChild(title);
+      let titleElem;
+      if (this.config.showSourceLink) {
+        titleElem = document.createElement("a");
+        titleElem.href = item.link;
+        titleElem.target = "_blank";
+      } else {
+        titleElem = document.createElement("div");
+      }
+      titleElem.textContent = item.title;
+      titleElem.className = "genewatch-title";
+      itemContainer.appendChild(titleElem);
 
       if (item.summary) {
         const summary = document.createElement("div");
