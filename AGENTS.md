@@ -1,53 +1,33 @@
-# 🧬 MMM-GeneWatch – Daily Biotech Breakthroughs
+### Prompt for Codex (Python)
 
-## 📋 Summary
+Write a complete, self-contained Python 3 program that implements a desktop GUI Password Generator using Tkinter.
 
-`MMM-GeneWatch` is a MagicMirror² module that displays daily or real-time breakthroughs in biotechnology and genetic research. It is intended to keep users up-to-date with the latest developments in CRISPR, synthetic DNA, AI-designed medicines, and genomic science. Information is aggregated from reputable scientific journals and optionally summarized by GPT.
+**Functional requirements**
+1. The window title should be “Secure Password Generator”.
+2. Layout:
+   • A label asking “Password length:” next to a Spinbox (minimum = 6, maximum = 64, default = 12).  
+   • Four Checkbuttons to include/exclude character sets:  
+     – “Uppercase A-Z” (checked by default)  
+     – “Lowercase a-z” (checked by default)  
+     – “Digits 0-9” (checked by default)  
+     – “Symbols !@#$…​” (checked by default)  
+   • A “Generate” Button.  
+   • A readonly Entry field that displays the newly generated password.  
+   • A “Copy to clipboard” Button that copies the current password to the system clipboard and shows a short confirmation (e.g., a pop-up or temporary status label).
 
----
+3. If the user unchecks **every** character-set box, disable the Generate button and display an error message until at least one box is re-checked.
 
-## 📡 Data Sources
+4. Password generation must be cryptographically secure: use `secrets.choice` over a combined character pool built from the selected character sets.
 
-- [Nature Biotechnology](https://www.nature.com/nbt/)
-- [Science Magazine - Genetics Section](https://www.science.org/)
-- [bioRxiv Preprints – Genetics/Bioinformatics](https://www.biorxiv.org/)
-- Optional: GPT-generated summaries of articles using OpenAI API
+5. The GUI window must be resizable, with sensible padding, and widgets should expand/anchor gracefully.
 
----
+**Code style & delivery requirements**
+- Provide **the entire code**, from `import` statements to the `if __name__ == "__main__":` guard, with no omissions, truncations, or placeholders.  
+- Include clear inline comments in English explaining each logical section.  
+- Follow PEP 8 where practical (line length ≤ 88).  
+- Avoid global variables except `CHAR_SETS` constants; encapsulate the app in a class named `PasswordGeneratorApp`.  
+- Do not rely on external libraries beyond Python’s standard library.
 
-## ⚙️ Features
-
-- 🧠 Summarizes top 1–3 daily biotech news items
-- 🧬 Tags discoveries: `CRISPR`, `synthetic DNA`, `mRNA`, `AI drug design`, etc.
-- ⏳ Configurable refresh interval (e.g. every 6h or once daily)
-- 📜 Minimalist mirror-friendly UI
-- 🔗 Option to display original source link
-
----
-## AI agent to use = model: "gpt-4.1-nano",
-
-## 🧰 Config Options (example)
-
-```js
-{
-  module: "MMM-GeneWatch",
-  position: "top_left",
-  config: {
-    updateInterval: 6 * 60 * 60 * 1000, // every 6 hours
-    showTags: true,
-    showSourceLink: true, // display original source link
-    maxItems: 3,
-    sources: ["bioRxiv", "Nature", "Science"],
-    useGPTSummary: true,
-    openaiApiKey: "YOUR_API_KEY"
-  }
-}
-
-MMM-GeneWatch/
-├── MMM-GeneWatch.js         # Frontend module display
-├── node_helper.js           # Fetches and parses RSS feeds / GPT
-├── styles.css               # Clean biotech-themed design
-├── AGENT.md                 # This file
-
-Goal
-To inspire curiosity and awareness of cutting-edge bioscience—right from your mirror.
+Return only the Python code block—no extra explanation or markdown.
+password_generator_gui.py
+packages.txt 
