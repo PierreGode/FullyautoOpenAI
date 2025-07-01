@@ -4,7 +4,6 @@ on:
   push:
   workflow_dispatch:
   schedule:
-    # Runs every hour; adjust as needed
     - cron: '0 * * * *'
 
 jobs:
@@ -28,19 +27,20 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          python3 -c "
-import openai, os
+          python3 <<EOF
+import openai
+import os
 with open('AGENT.md') as f:
     prompt = f.read()
 openai.api_key = os.getenv('OPENAI_API_KEY')
 response = openai.ChatCompletion.create(
-    model='gpt-4.1-nano',
-    messages=[{'role':'system','content':prompt}],
+    model='gpt-4o',
+    messages=[{'role': 'system', 'content': prompt}],
     max_tokens=2048,
     temperature=0.3
 )
 print(response.choices[0].message.content)
-"
+EOF
 
       - name: Commit and push changes
         env:
