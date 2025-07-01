@@ -50,7 +50,7 @@ module.exports = NodeHelper.create({
       if (this.config.useGPTSummary && this.openai) {
         try {
           const response = await this.openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
+            model: "gpt-4.1-nano",
             messages: [
               { role: "system", content: "You summarize biotechnology news." },
               { role: "user", content: `Summarize this in two sentences:\n${item.summary || item.title}` }

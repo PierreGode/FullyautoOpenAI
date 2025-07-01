@@ -24,6 +24,7 @@
 - 🔗 Option to display original source link
 
 ---
+## AI agent to use = model: "gpt-4.1-nano",
 
 ## 🧰 Config Options (example)
 
