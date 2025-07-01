@@ -31,3 +31,4 @@ Write a complete, self-contained Python 3 program that implements a desktop GUI 
 Return only the Python code block—no extra explanation or markdown.
 password_generator_gui.py
 packages.txt 
+add a lot of colors
