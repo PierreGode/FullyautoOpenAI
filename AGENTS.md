@@ -1,54 +1,94 @@
- Context & Objective
-Prompt:
+# AGENT.md
 
-“I have an existing command-line benchmarking tool called SWE-Bench. Help me design an application with a graphical user interface that lets users select tests, run benchmarks, and view results interactively. Outline the overall workflow.”
+This document provides clear, step-by-step instructions for an AI agent to design and scaffold a GUI wrapper around the existing SWE-Bench CLI tool. Each section defines specific tasks the agent should perform or outline.
 
-2. User & UX Requirements
-Prompt:
+## 1. Context & Objective
 
-“List the key user personas (e.g. DevOps engineer, QA analyst) and their main use cases for the SWE-Bench GUI. For each persona, describe their primary tasks, pain points, and how the GUI can solve them.”
+* **Goal**: Create a GUI application that integrates with the existing SWE-Bench CLI.
+* **Task**: Outline the full end-to-end workflow from launching the GUI to visualizing results.
 
-3. Wireframes & Navigation Flow
-Prompt:
+## 2. User & UX Requirements
 
-“Sketch out the screen hierarchy and navigation flow for the GUI: home/dashboard, test configuration, execution monitor, results viewer, and settings. Describe what each screen shows and how users move between them.”
+* **Identify Personas**: DevOps engineers, QA analysts, developers, team leads, and SWE-Bench maintainers.
+* **For Each Persona**:
 
-4. Technology Stack & Frameworks
-Prompt:
+  * Define primary tasks they will perform.
+  * List pain points with the CLI.
+  * Describe how the GUI features will address those pain points.
 
-“Recommend a tech stack for building the SWE-Bench GUI. Compare desktop options (e.g. Electron, Qt) versus web-based (React, Vue) approaches, citing pros and cons for integration with the existing CLI tool.”
+## 3. Wireframes & Navigation Flow
 
-5. Integration with SWE-Bench CLI
-Prompt:
+* **Screen List**: Dashboard, Test Configuration, Execution Monitor, Results Viewer, Settings.
+* **For Each Screen**:
 
-“Explain how the GUI can invoke the existing SWE-Bench binary or library under the hood. Cover argument passing, environment setup, capturing stdout/stderr, and parsing output into structured data.”
+  * Specify key UI components and controls.
+  * Explain data displayed.
+  * Define navigation paths between screens.
+* **Deliverable**: A textual wireframe or ASCII diagram showing screen hierarchy and transitions.
 
-6. Data Modeling & Storage
-Prompt:
+## 4. Technology Stack & Frameworks
 
-“Design a simple data model for storing benchmark runs and results. Include entities like TestSuite, RunMetadata, Metric, and UserSettings. Suggest a lightweight storage solution (e.g. SQLite, JSON files) and explain why.”
+* **Compare Options**:
 
-7. Results Visualization
-Prompt:
+  * Electron vs. Qt for desktop.
+  * React/Vue web-based approaches (with or without Electron shell).
+* **For Each Option**:
 
-“Propose a set of visualizations—charts, tables, timelines—to display benchmark metrics (e.g. execution time, memory usage). Recommend libraries (e.g. Chart.js, D3) and describe how the GUI updates these in real time or on demand.”
+  * List pros and cons, especially CLI integration complexity.
+  * Recommend a preferred stack with justification.
 
-8. Configuration & Preferences
-Prompt:
+## 5. Integration with SWE-Bench CLI
 
-“Outline how users will configure test parameters and global settings. Include things like selecting target code paths, setting iterations, threshold alerts, and storing presets for later reuse.”
+* **Invocation Method**: Describe how to spawn the SWE-Bench process (e.g., Node child\_process or QProcess).
+* **Argument Handling**: Explain building, validating, and passing CLI arguments from the GUI.
+* **Environment Setup**: Detail handling of environment variables.
+* **Output Capture**: Show how to stream stdout/stderr to the UI and tag lines.
+* **Parsing**: Define parsing of structured output (JSON) or fallback to regex parsing.
 
-9. Packaging & Distribution
-Prompt:
+## 6. Data Modeling & Storage
 
-“Suggest a packaging strategy for distributing the GUI app to users on Windows, macOS, and Linux. Cover bundling the SWE-Bench executable, automatic updates, and installer creation.”
+* **Entities**: TestSuite, RunMetadata, Metric, UserSettings.
+* **Attributes**: List fields for each entity.
+* **Storage Engine**: Recommend SQLite or JSON files, with pros and cons.
+* **Schema**: Provide a simple ER diagram or table of relational structure.
 
-10. Testing & Quality Assurance
-Prompt:
+## 7. Results Visualization
 
-“Define a testing plan for the GUI wrapper: unit tests for frontend components, integration tests that run actual benchmarks, and end-to-end tests simulating a user workflow. Recommend frameworks or tools.”
+* **Visualization Types**: Line charts, bar graphs, scatter plots, timelines, data tables, dashboard cards.
+* **Library Suggestions**: Chart.js, D3.js, Recharts, vis.js.
+* **Update Strategy**: Explain real-time streaming vs. post-run rendering.
 
-11. Deployment & User Feedback
-Prompt:
+## 8. Configuration & Preferences
 
-“Plan a beta release process: how to gather user feedback, log crash reports, and iterate on UI/UX improvements. Suggest metrics to track adoption and satisfaction.”
+* **Test Configuration UI**: Detail selectors for test suites, parameters, thresholds, and presets.
+* **Global Settings UI**: Include CLI path, env vars, theme, storage location.
+* **Persistence**: Describe how settings are saved and loaded.
+
+## 9. Packaging & Distribution
+
+* **Platforms**: Windows, macOS, Linux.
+* **Packaging Tools**: Electron-builder (NSIS, DMG, AppImage), AppImage, DEB/RPM.
+* **Auto-Update**: Recommend Electron Updater or Sparkle.
+* **Bundling**: Explain including the SWE-Bench executable per OS.
+
+## 10. Testing & Quality Assurance
+
+* **Test Levels**:
+
+  * Unit tests for UI components (Jest, React Testing Library, Vitest).
+  * Integration tests for CLI invocation (Mocha/Chai, pytest-qt).
+  * End-to-end tests simulating user workflows (Playwright, Cypress).
+  * Smoke tests for basic launch and CLI bundling.
+* **CI Integration**: Describe running tests on PRs and nightly builds.
+
+## 11. Deployment & User Feedback
+
+* **Beta Process**: Outline distribution method for beta testers.
+* **Feedback Channels**: In-app feedback forms or issue templates.
+* **Error Reporting**: Integrate Sentry or similar for crash dumps.
+* **Analytics**: Propose opt-in event tracking for runs, screens, and errors.
+* **Metrics**: Define adoption, stability, engagement, and satisfaction metrics.
+
+---
+
+> *Use this AGENT.md as the single source of truth for automating the design and scaffold of the SWE-Bench GUI application.*
