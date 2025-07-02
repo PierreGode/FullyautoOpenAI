@@ -1,28 +1,16 @@
 # .github/workflows/codex_self_improving.yml
 # ────────────────────────────────────────────────────────────────
-#  Codex + SWE-bench Self-Improving Pipeline
-#
-#  1) Codex CLI edits your repo based on AGENTS.md
-#  2) SWE-agent (gpt-4.1-mini) generates patches for remaining failures
-#     using ONLY the git_apply_patch tool (falling back to diff parsing)
-#  3) SWE-bench harness evaluates merged predictions
-#  4) AGENTS.md is refined according to latest failures
-#  5) All changes (code, results, predictions, AGENTS.md) are committed
-# ────────────────────────────────────────────────────────────────
 name: Codex Self-Improving Pipeline
 
 on:
   workflow_dispatch:
   # schedule:
-  #   - cron: '0 1 * * *'    # uncomment to run daily at 01:00 UTC
+  #   - cron: '0 1 * * *'
 
 env:
   MODEL_NAME: gpt-4.1-mini
 
 jobs:
-  # ─────────────────────────────────────────────────────────────
-  # 1) Codex CLI edits the repository
-  # ─────────────────────────────────────────────────────────────
   codex-auto-update:
     runs-on: ubuntu-latest
     steps:
@@ -44,12 +32,8 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           CODEX_QUIET_MODE: "1"
         run: |
-          codex --approval-mode full-auto --quiet \
-            "follow the instructions in AGENTS.md"
+          codex --approval-mode full-auto --quiet "follow the instructions in AGENTS.md"
 
-  # ─────────────────────────────────────────────────────────────
-  # 2) Generate & evaluate patches, then refine AGENTS.md
-  # ─────────────────────────────────────────────────────────────
   swebench-eval:
     needs: codex-auto-update
     runs-on: ubuntu-latest
@@ -89,15 +73,13 @@ jobs:
             echo "::notice::No previous results – running full Lite split"
           fi
 
-      # 2-5 Generate new patches (only git_apply_patch)
+      # 2-5 Generate new patches with SWE-agent (default parser)
       - name: Generate GPT-4.1-mini patches (SWE-agent)
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           sweagent run-batch \
             --agent.model.name=${MODEL_NAME} \
-            --tools.allow=git_apply_patch \
-            --tools.parse_function.type=thought_action \
             --instances.type=swe_bench \
             --instances.subset=lite \
             --instances.split=dev \
