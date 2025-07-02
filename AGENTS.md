@@ -1,3 +1,9 @@
-### Prompt for Codex (Python)
+**IMPORTANT**: Your only output **MUST** be a single JSON object of the form:
 
-Write your own application
+```json
+{
+  "name": "git_apply_patch",
+  "arguments": {
+    "patch": "<your unified diff here>"
+  }
+}
