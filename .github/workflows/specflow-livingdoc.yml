@@ -1,0 +1,48 @@
+name: SpecFlow LivingDoc
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-and-generate:
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore tests/HighLevelTests/HighLevelTests.csproj
+
+      - name: Build
+        run: dotnet build --no-restore tests/HighLevelTests/HighLevelTests.csproj --configuration Release
+
+      - name: Run tests and generate LivingDoc
+        run: |
+          dotnet test tests/HighLevelTests/HighLevelTests.csproj --no-build --configuration Release --logger "trx;LogFileName=TestResults.trx"
+          dotnet tool install --global SpecFlow.Plus.LivingDoc.CLI
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          mkdir -p docs
+          livingdoc test-assembly --test-assembly tests/HighLevelTests/bin/Release/net8.0/HighLevelTests.dll --output docs/livingdoc.html
+
+      - name: Upload LivingDoc artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: LivingDoc
+          path: docs/livingdoc.html
+
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.G_TOKEN }}
+          publish_dir: docs
