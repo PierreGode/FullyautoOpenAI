@@ -1,23 +1,23 @@
-# ────────────────────────────────────────────────────────────────
-# scripts/get_failed_instances.py
-# ────────────────────────────────────────────────────────────────
 #!/usr/bin/env python3
 """
-Extract still-failing instance IDs.
-Usage:
-    python get_failed_instances.py instance_results.jsonl output.txt
-Exit 0 even if input missing (first run).
+Extract still-failing instance IDs from instance_results.jsonl.
+Writes one ID per line to output file.
+Exit 0 when input JSONL missing → treated as first run.
 """
 import json, sys, pathlib
+
 src = pathlib.Path(sys.argv[1])
 dst = pathlib.Path(sys.argv[2])
+
 if not src.exists():
-    print("no previous results -> full run")
+    print("no previous results – full run next")
     sys.exit(0)
-fail = [
-    json.loads(l)["instance_id"]
-    for l in src.read_text().splitlines()
-    if not json.loads(l).get("passed", False)
+
+fails = [
+    json.loads(line)["instance_id"]
+    for line in src.read_text().splitlines()
+    if not json.loads(line).get("passed", False)
 ]
-dst.write_text("\n".join(fail))
-print(f"{len(fail)} failing instances saved to {dst}")
+
+dst.write_text("\n".join(fails))
+print(f"{len(fails)} failing instances listed in {dst}")
