@@ -1,11 +1,11 @@
 # AGENT.md
 
-This document provides clear, step-by-step instructions for an AI agent to design and scaffold a GUI wrapper around the existing SWE-Bench CLI tool. Each section defines specific tasks the agent should perform or outline.
+This document provides clear, step-by-step instructions for you to design and scaffold a GUI wrapper around the existing SWE-Bench CLI tool. Each section defines specific tasks the agent should perform or outline.
 
 ## 1. Context & Objective
 
 * **Goal**: Create a GUI application that integrates with the existing SWE-Bench CLI.
-* **Task**: Outline the full end-to-end workflow from launching the GUI to visualizing results.
+* **Task**: full end-to-end workflow from launching the GUI to visualizing results.
 
 ## 2. User & UX Requirements
 
@@ -39,37 +39,37 @@ This document provides clear, step-by-step instructions for an AI agent to desig
 
 ## 5. Integration with SWE-Bench CLI
 
-* **Invocation Method**: Describe how to spawn the SWE-Bench process (e.g., Node child\_process or QProcess).
+* **Invocation Method**: spawn the SWE-Bench process (e.g., Node child\_process or QProcess).
 * **Argument Handling**: Explain building, validating, and passing CLI arguments from the GUI.
 * **Environment Setup**: Detail handling of environment variables.
-* **Output Capture**: Show how to stream stdout/stderr to the UI and tag lines.
-* **Parsing**: Define parsing of structured output (JSON) or fallback to regex parsing.
+* **Output Capture**: stream stdout/stderr to the UI and tag lines.
+* **Parsing**: parsing of structured output (JSON) or fallback to regex parsing.
 
 ## 6. Data Modeling & Storage
 
 * **Entities**: TestSuite, RunMetadata, Metric, UserSettings.
 * **Attributes**: List fields for each entity.
-* **Storage Engine**: Recommend SQLite or JSON files, with pros and cons.
+* **Storage Engine**: JSON files
 * **Schema**: Provide a simple ER diagram or table of relational structure.
 
 ## 7. Results Visualization
 
 * **Visualization Types**: Line charts, bar graphs, scatter plots, timelines, data tables, dashboard cards.
 * **Library Suggestions**: Chart.js, D3.js, Recharts, vis.js.
-* **Update Strategy**: Explain real-time streaming vs. post-run rendering.
+* **Update Strategy**: use real-time streaming or post-run rendering.
 
 ## 8. Configuration & Preferences
 
 * **Test Configuration UI**: Detail selectors for test suites, parameters, thresholds, and presets.
 * **Global Settings UI**: Include CLI path, env vars, theme, storage location.
-* **Persistence**: Describe how settings are saved and loaded.
+* **Persistence**: decide how settings are saved and loaded.
 
 ## 9. Packaging & Distribution
 
-* **Platforms**: Windows, macOS, Linux.
-* **Packaging Tools**: Electron-builder (NSIS, DMG, AppImage), AppImage, DEB/RPM.
-* **Auto-Update**: Recommend Electron Updater or Sparkle.
-* **Bundling**: Explain including the SWE-Bench executable per OS.
+* **Platforms**: Windows
+* **Packaging Tools**: Electron-builder (NSIS, DMG, AppImage), AppImage, DEB/RPM. ?
+* **Auto-Update**: Electron Updater or Sparkle.
+* **Bundling**: SWE-Bench executable per OS.
 
 ## 10. Testing & Quality Assurance
 
@@ -91,4 +91,4 @@ This document provides clear, step-by-step instructions for an AI agent to desig
 
 ---
 
-> *Use this AGENT.md as the single source of truth for automating the design and scaffold of the SWE-Bench GUI application.*
+> *Use this AGENT.md as the single source of truth for automating of the SWE-Bench GUI application.*
