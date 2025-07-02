@@ -7,4 +7,4 @@ pipeline will build anything you defined in AGENTS.md and push to the repo
 
 
 
-in settings/secrets/actions set repository secrets G_TOKEN and OPENAI_API_KEY
+in settings/secrets/actions set repository secrets G_TOKEN (github token) and OPENAI_API_KEY
