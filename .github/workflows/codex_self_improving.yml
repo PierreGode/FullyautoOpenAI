@@ -94,15 +94,15 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           sweagent run-batch \
-            --agent.model.name $MODEL_NAME \
-            --agent.tools.allow git_apply_patch \
-            --agent.tools.parse_function.type thought_action \
-            --instances.type swe_bench \
-            --instances.subset lite \
-            --instances.split dev \
+            --agent.model.name=${MODEL_NAME} \
+            --agent.tools.allow=git_apply_patch \
+            --agent.tools.parse_function.type=thought_action \
+            --instances.type=swe_bench \
+            --instances.subset=lite \
+            --instances.split=dev \
             ${{ steps.failcheck.outputs.slice_arg }} \
-            --num_workers 4 \
-            --output_dir sweagent_output
+            --num_workers=4 \
+            --output_dir=sweagent_output
 
       # 2-6 Convert preds.json → JSONL
       - name: Convert preds.json to JSONL
@@ -122,8 +122,8 @@ jobs:
           python -m swebench.harness.run_evaluation \
             --dataset_name princeton-nlp/SWE-bench_Lite \
             --predictions_path predictions.jsonl \
-            --max_workers 8 \
-            --run_id codex_${{ github.run_number }}
+            --max_workers=8 \
+            --run_id=codex_${{ github.run_number }}
 
       # 2-9 Create a prompt for Codex to refine AGENTS.md
       - name: Build AGENTS.md update prompt
