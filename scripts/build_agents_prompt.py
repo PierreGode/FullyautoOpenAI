@@ -3,32 +3,34 @@
 # ────────────────────────────────────────────────────────────────
 #!/usr/bin/env python3
 """
-Create a natural-language prompt telling Codex to improve AGENTS.md
-based on failing instances.
-Usage:
-    python build_agents_prompt.py instance_results.jsonl output_prompt.txt
+Generate a prompt telling Codex to refine AGENTS.md
+based on remaining failures.
 """
 import json, sys, pathlib, textwrap
-src = pathlib.Path(sys.argv[1]); out = pathlib.Path(sys.argv[2])
-failed = []
+
+src = pathlib.Path(sys.argv[1])
+out = pathlib.Path(sys.argv[2])
+
+fails = []
 if src.exists():
-    for l in src.read_text().splitlines():
-        rec = json.loads(l)
+    for line in src.read_text().splitlines():
+        rec = json.loads(line)
         if not rec.get("passed", False):
-            failed.append(rec["instance_id"])
+            fails.append(rec["instance_id"])
+
 prompt = textwrap.dedent(f"""
-    You are a coding agent editing this repository. Open the file AGENTS.md
-    and improve its guidelines so that GPT-4.1-mini can fix the remaining
-    SWE-bench Lite failures listed below.
+    You are an automated coding agent working in this repository.
+    Open AGENTS.md and improve its guidelines so that GPT-4.1-mini
+    can fix the remaining SWE-bench-Lite failures below.
 
-    Remaining failing instances (total {len(failed)}):
-    {', '.join(failed[:50])}
-    {'...' if len(failed) > 50 else ''}
+    Remaining failing instances (count {len(fails)}):
+    {', '.join(fails[:50])}{' ...' if len(fails) > 50 else ''}
 
-    • For each common error pattern you can infer, add a concrete strategy.
-    • Add at least one worked example diff if appropriate.
-    • Do NOT remove existing good advice; append or refine instead.
-    • Save and exit the file when done.
+    • Add concrete strategies or patterns that address these failures.
+    • Keep existing good advice; append or refine instead of deleting.
+    • Include short example diffs if helpful.
+    • Save and exit the file when finished.
 """).strip()
+
 out.write_text(prompt + "\n")
 print(f"prompt written to {out}")
