@@ -1,16 +1,28 @@
 # .github/workflows/codex_self_improving.yml
 # ────────────────────────────────────────────────────────────────
+#  Codex + SWE-bench Self-Improving Pipeline
+#
+#  1) Codex CLI edits your repo based on AGENTS.md
+#  2) SWE-agent generates patches for remaining failures (gpt-4.1-mini)
+#     using a dedicated prompt that forces git_apply_patch JSON calls
+#  3) SWE-bench harness evaluates merged predictions
+#  4) Codex CLI refines AGENTS.md based on latest failures
+#  5) All code, predictions, results, and AGENTS.md changes are committed
+# ────────────────────────────────────────────────────────────────
 name: Codex Self-Improving Pipeline
 
 on:
   workflow_dispatch:
   # schedule:
-  #   - cron: '0 1 * * *'
+  #   - cron: '0 1 * * *'    # uncomment to run daily at 01:00 UTC
 
 env:
   MODEL_NAME: gpt-4.1-mini
 
 jobs:
+  # ─────────────────────────────────────────────────────────────
+  # 1) Codex CLI edits the repository
+  # ─────────────────────────────────────────────────────────────
   codex-auto-update:
     runs-on: ubuntu-latest
     steps:
@@ -32,8 +44,12 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           CODEX_QUIET_MODE: "1"
         run: |
-          codex --approval-mode full-auto --quiet "follow the instructions in AGENTS.md"
+          codex --approval-mode full-auto --quiet \
+            "follow the instructions in AGENTS.md"
 
+  # ─────────────────────────────────────────────────────────────
+  # 2) Generate & evaluate patches, then refine AGENTS.md
+  # ─────────────────────────────────────────────────────────────
   swebench-eval:
     needs: codex-auto-update
     runs-on: ubuntu-latest
@@ -51,7 +67,7 @@ jobs:
           python-version: '3.11'
 
       # 2-3 Install SWE-bench harness + SWE-agent (editable)
-      - name: Install SWE-bench & SWE-agent (editable)
+      - name: Install SWE-bench & SWE-agent
         run: |
           pip install --upgrade pip
           pip install git+https://github.com/SWE-bench/SWE-bench.git@main
@@ -70,16 +86,19 @@ jobs:
             echo "::notice::Running only failing instances"
           else
             echo "slice_arg=" >> $GITHUB_OUTPUT
-            echo "::notice::No previous results – running full Lite split"
+            echo "::notice::Running full Lite split"
           fi
 
-      # 2-5 Generate new patches with SWE-agent (default parser)
+      # 2-5 Generate new patches with SWE-agent (custom prompt)
       - name: Generate GPT-4.1-mini patches (SWE-agent)
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
+          # Copy in custom prompt that forces git_apply_patch JSON
+          cp scripts/sweagent_prompt.txt ./
           sweagent run-batch \
             --agent.model.name=${MODEL_NAME} \
+            --prompt.extra="$(cat sweagent_prompt.txt)" \
             --instances.type=swe_bench \
             --instances.subset=lite \
             --instances.split=dev \
@@ -115,8 +134,8 @@ jobs:
             evaluation_results/latest/instance_results.jsonl \
             agents_update_prompt.txt
 
-      # 2-10 Self-update AGENTS.md
-      - name: Self-update AGENTS.md with Codex
+      # 2-10 Self-update AGENTS.md with Codex
+      - name: Self-update AGENTS.md
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
