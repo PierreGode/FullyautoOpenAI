@@ -1,26 +1,28 @@
+# .github/workflows/codex_self_improving.yml
 # ────────────────────────────────────────────────────────────────
 #  Codex + SWE-bench Self-Improving Pipeline
-#  • Edits code with Codex (Full-Auto, driven by AGENTS.md)
-#  • Generates patches for remaining SWE-bench-Lite failures
-#    using GPT-4.1-mini via SWE-agent (only git_apply_patch)
-#  • Evaluates with SWE-bench harness
-#  • Updates AGENTS.md based on failures
-#  • Commits code, predictions, results, and refined AGENTS.md
+#
+#  1) Codex CLI edits your repo based on AGENTS.md
+#  2) SWE-agent (gpt-4.1-mini) generates patches for remaining failures
+#     using ONLY the git_apply_patch tool (falling back to diff parsing)
+#  3) SWE-bench harness evaluates merged predictions
+#  4) AGENTS.md is refined according to latest failures
+#  5) All changes (code, results, predictions, AGENTS.md) are committed
 # ────────────────────────────────────────────────────────────────
 name: Codex Self-Improving Pipeline
 
 on:
   workflow_dispatch:
   # schedule:
-  #   - cron: '0 1 * * *'          # uncomment for daily 01:00 UTC runs
+  #   - cron: '0 1 * * *'    # uncomment to run daily at 01:00 UTC
 
 env:
-  MODEL_NAME: gpt-4.1-mini        # model for SWE-agent
+  MODEL_NAME: gpt-4.1-mini
 
 jobs:
-  # ────────────────────────────────────────────────────────────────
-  # 1) Let Codex edit the repo according to the *current* AGENTS.md
-  # ────────────────────────────────────────────────────────────────
+  # ─────────────────────────────────────────────────────────────
+  # 1) Codex CLI edits the repository
+  # ─────────────────────────────────────────────────────────────
   codex-auto-update:
     runs-on: ubuntu-latest
     steps:
@@ -29,7 +31,7 @@ jobs:
         with:
           token: ${{ secrets.G_TOKEN }}
 
-      - name: Set up Node.js 22 (Codex CLI requirement)
+      - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -45,35 +47,34 @@ jobs:
           codex --approval-mode full-auto --quiet \
             "follow the instructions in AGENTS.md"
 
-  # ────────────────────────────────────────────────────────────────
-  # 2) Evaluate, generate new patches, and refine AGENTS.md
-  # ────────────────────────────────────────────────────────────────
+  # ─────────────────────────────────────────────────────────────
+  # 2) Generate & evaluate patches, then refine AGENTS.md
+  # ─────────────────────────────────────────────────────────────
   swebench-eval:
     needs: codex-auto-update
     runs-on: ubuntu-latest
-
     steps:
-      # 2-1 Repo state *after* Codex edits
+      # 2-1 Checkout updated repo
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.G_TOKEN }}
 
-      # 2-2 Python
-      - name: Set up Python
+      # 2-2 Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # 2-3 Install SWE-bench harness + SWE-agent (editable clone ⇒ includes folders)
+      # 2-3 Install SWE-bench harness + SWE-agent (editable)
       - name: Install SWE-bench & SWE-agent (editable)
         run: |
           pip install --upgrade pip
           pip install git+https://github.com/SWE-bench/SWE-bench.git@main
           git clone --depth 1 https://github.com/SWE-agent/SWE-agent.git
-          pip install -e SWE-agent            # keeps config/, tools/, trajectories/
+          pip install -e SWE-agent
 
-      # 2-4 Identify still-failing instances (if any)
+      # 2-4 Identify still-failing instances
       - name: Get list of previously failed instances
         id: failcheck
         run: |
@@ -88,15 +89,15 @@ jobs:
             echo "::notice::No previous results – running full Lite split"
           fi
 
-      # 2-5 Generate new patches with SWE-agent (only git_apply_patch)
+      # 2-5 Generate new patches (only git_apply_patch)
       - name: Generate GPT-4.1-mini patches (SWE-agent)
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           sweagent run-batch \
             --agent.model.name=${MODEL_NAME} \
-            --agent.tools.allow=git_apply_patch \
-            --agent.tools.parse_function.type=thought_action \
+            --tools.allow=git_apply_patch \
+            --tools.parse_function.type=thought_action \
             --instances.type=swe_bench \
             --instances.subset=lite \
             --instances.split=dev \
@@ -104,19 +105,19 @@ jobs:
             --num_workers=4 \
             --output_dir=sweagent_output
 
-      # 2-6 Convert preds.json → JSONL
+      # 2-6 Convert preds.json → predictions_NEW.jsonl
       - name: Convert preds.json to JSONL
         run: |
           python scripts/jsonl_from_preds.py \
             sweagent_output/preds.json predictions_NEW.jsonl
 
-      # 2-7 Merge with existing best-known predictions
+      # 2-7 Merge with existing master predictions.jsonl
       - name: Merge predictions
         run: |
           python scripts/merge_predictions.py \
             predictions_NEW.jsonl predictions.jsonl
 
-      # 2-8 Evaluate merged predictions with SWE-bench harness
+      # 2-8 Evaluate merged predictions
       - name: Run SWE-bench evaluation
         run: |
           python -m swebench.harness.run_evaluation \
@@ -125,28 +126,28 @@ jobs:
             --max_workers=8 \
             --run_id=codex_${{ github.run_number }}
 
-      # 2-9 Create a prompt for Codex to refine AGENTS.md
+      # 2-9 Build prompt to refine AGENTS.md
       - name: Build AGENTS.md update prompt
         run: |
           python scripts/build_agents_prompt.py \
             evaluation_results/latest/instance_results.jsonl \
             agents_update_prompt.txt
 
-      # 2-10 Call Codex to update AGENTS.md in place
+      # 2-10 Self-update AGENTS.md
       - name: Self-update AGENTS.md with Codex
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           codex --approval-mode full-auto --quiet "$(cat agents_update_prompt.txt)"
 
-      # 2-11 Update “latest” symlink for next run
+      # 2-11 Update “latest” symlink
       - name: Move latest symlink
         run: |
           rm -rf evaluation_results/latest || true
           ln -s $(ls -d evaluation_results/codex_* | sort | tail -n1) \
                 evaluation_results/latest
 
-      # 2-12 Commit and push everything back
+      # 2-12 Commit & push all changes
       - name: Commit and push changes
         env:
           G_TOKEN: ${{ secrets.G_TOKEN }}
