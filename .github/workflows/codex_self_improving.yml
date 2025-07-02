@@ -89,13 +89,14 @@ jobs:
           echo "::notice::No previous results – running full Lite split"
         fi
 
-    # 2-5 Generate new patches with SWE-agent (with fallback parser)
+    # 2-5 Generate new patches with SWE-agent (no Bash, fallback parser)
     - name: Generate GPT-4.1-mini patches (SWE-agent)
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       run: |
         sweagent run-batch \
           --agent.model.name $MODEL_NAME \
+          --agent.tools.exclude bash \
           --agent.tools.parse_function.type thought_action \
           --instances.type swe_bench \
           --instances.subset lite \
