@@ -1,6 +1,6 @@
 # AGENT.md
 
-This document provides clear, step-by-step instructions for you to design and scaffold a GUI wrapper around the existing SWE-Bench CLI tool. Each section defines specific tasks the agent should perform or outline.
+You are to build a GUI wrapper application around the existing SWE-Bench CLI tool
 
 ## 1. Context & Objective
 
